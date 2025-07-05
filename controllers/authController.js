@@ -26,9 +26,7 @@ const createSendToken = (user, statusCode, res) => {
   res.status(statusCode).json({
     status: "success",
     token,
-    data: {
-      user,
-    },
+    user,
   });
 };
 
@@ -48,7 +46,9 @@ exports.register = async (req, res) => {
     await newUser.save();
     createSendToken(newUser, 201, res);
   } catch (err) {
-    res.status(500).json({ message: "Registration failed", error: err.message });
+    res
+      .status(500)
+      .json({ message: "Registration failed", error: err.message });
   }
 };
 
@@ -57,7 +57,9 @@ exports.login = async (req, res) => {
   const { email, password } = req.body;
 
   if (!email || !password) {
-    return res.status(400).json({ message: "Please provide email and password" });
+    return res
+      .status(400)
+      .json({ message: "Please provide email and password" });
   }
 
   try {
@@ -93,7 +95,9 @@ exports.forgotPassword = async (req, res) => {
   await user.save({ validateBeforeSave: false });
 
   // Send the reset token to the user's email
-  const resetURL = `${req.protocol}://${req.get("host")}/api/v1/auth/resetPassword/${resetToken}`;
+  const resetURL = `${req.protocol}://${req.get(
+    "host"
+  )}/api/v1/auth/resetPassword/${resetToken}`;
   const message = `Forgot your password? Submit a PATCH request with your new password and passwordConfirm to: ${resetURL}`;
 
   try {
@@ -102,11 +106,16 @@ exports.forgotPassword = async (req, res) => {
       subject: "Your password reset token (valid for 10 min)",
       message,
     });
-    res.status(200).json({ status: "success", message: "Token sent to email!" });
+    res
+      .status(200)
+      .json({ status: "success", message: "Token sent to email!" });
   } catch (err) {
     user.passwordResetToken = undefined;
     user.passwordResetExpires = undefined;
     await user.save({ validateBeforeSave: false });
-    res.status(500).json({ status: "error", message: "There was an error sending the email" });
+    res.status(500).json({
+      status: "error",
+      message: "There was an error sending the email",
+    });
   }
 };
