@@ -26,14 +26,7 @@ const createSendToken = (user, statusCode, res) => {
   res.status(statusCode).json({
     status: "success",
     token,
-    user: {
-      id: user._id,
-      firstName: user.firstName,
-      lastName: user.lastName,
-      email: user.email,
-      state: user.state,
-      country: user.country,
-    },
+    user: user.toSafeObject(),
   });
 };
 

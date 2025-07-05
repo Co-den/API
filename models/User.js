@@ -70,6 +70,20 @@ userSchema.methods.createPasswordResetToken = function () {
   this.passwordResetExpires = Date.now() + 10 * 60 * 1000; // 10 minutes
   return resetToken;
 };
+
+// Method to convert user document to a safe object
+userSchema.methods.toSafeObject = function () {
+  return {
+    id: this._id,
+    email: this.email,
+    firstName: this.firstName,
+    lastName: this.lastName,
+    state: this.state,
+    country: this.country,
+    createdAt: this.createdAt,
+  };
+};
+
 const userModel = mongoose.model("User", userSchema);
 
 module.exports = userModel;
