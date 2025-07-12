@@ -1,18 +1,17 @@
-// controllers/geminiController.js
+// controllers/chatController.js
 const axios = require('axios');
 const dotenv = require('dotenv');
 const validator = require('validator');
 
-dotenv.config({ path: './.env' });
-
+dotenv.config();
 const API_KEY = process.env.API_KEY;
 
-exports.chatWithGemini = async (req, res) => {
+exports.askGemini = async (req, res) => {
   const { prompt } = req.body;
 
-  // Basic validation
+  // Validate input
   if (!prompt || typeof prompt !== 'string' || validator.isEmpty(prompt.trim())) {
-    return res.status(400).json({ message: 'A valid prompt is required.' });
+    return res.status(400).json({ message: 'Please provide a valid prompt.' });
   }
 
   try {
@@ -29,21 +28,16 @@ exports.chatWithGemini = async (req, res) => {
       }
     );
 
-    // Defensive response parsing
-    const result =
+    const reply =
       response?.data?.candidates?.[0]?.content?.parts?.[0]?.text ||
-      'No response text received from Gemini.';
+      'No meaningful reply received.';
 
-    return res.status(200).json({ response: result });
+    res.status(200).json({ response: reply });
   } catch (error) {
-    console.error('Gemini error:', {
-      status: error.response?.status || 'N/A',
-      data: error.response?.data || error.message,
-    });
-
-    return res.status(500).json({
-      message: 'Failed to communicate with Gemini.',
-      error: error.response?.data || 'Unexpected error occurred.',
+    console.error('Gemini API error:', error.response?.data || error.message);
+    res.status(500).json({
+      message: 'Gemini service error.',
+      error: error.response?.data || 'Unknown error.',
     });
   }
 };
