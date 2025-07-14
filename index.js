@@ -11,7 +11,8 @@ const app = express();
 // Middleware
 const allowedOrigins = [
   'http://localhost:8081',
-  'https://api-jsrm.onrender.com'
+  'https://api-jsrm.onrender.com',
+  'https://api-1-95eq.onrender.com'
 ];
 
 app.use(cors({
