@@ -3,6 +3,6 @@ const { chatWithGemini } = require('../controllers/aiController');
 
 const router = express.Router();
 
-router.post('/chat/gemini', chatWithGemini);
+router.post('/gemini', chatWithGemini);
 
 module.exports = router;
