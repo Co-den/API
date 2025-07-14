@@ -2,8 +2,9 @@
 const axios = require('axios');
 const dotenv = require('dotenv');
 const validator = require('validator');
+dotenv.config({ path: './.env' });
 
-dotenv.config();
+
 const API_KEY = process.env.API_KEY;
 
 exports.askGemini = async (req, res) => {
