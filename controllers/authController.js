@@ -9,7 +9,7 @@ const signToken = (id) => {
   });
 };
 
-const createSendToken = (user, statusCode, res) => {
+const createSendToken = (user, statusCode, req, res) => {
   const token = signToken(user._id);
   const cookieOptions = {
     expires: new Date(
@@ -51,7 +51,7 @@ exports.register = async (req, res) => {
 
   try {
     await newUser.save();
-    createSendToken(newUser, 201, res);
+    createSendToken(newUser, 201, req, res);
   } catch (err) {
     res
       .status(500)
@@ -75,7 +75,7 @@ exports.login = async (req, res) => {
       return res.status(401).json({ message: "Incorrect email or password" });
     }
 
-    createSendToken(user, 200, res);
+    createSendToken(user, 200, req, res);
   } catch (err) {
     res.status(500).json({ message: "Login failed", error: err.message });
   }
