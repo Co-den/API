@@ -1,45 +1,77 @@
-const mongoose = require('mongoose');
-const bcrypt = require('bcryptjs');
+const mongoose = require("mongoose");
+const bcrypt = require("bcryptjs");
+const validator = require("validator");
+const crypto = require("crypto");
 
-const userSchema = new mongoose.Schema({
-  firstName: String,
-  lastName: String,
-  email: {
-    type: String,
-    required: true,
-    unique: true,
-  },
-  password: {
-    type: String,
-    required: true,
-    minlength: 8,
-    select: false,
-  },
-  passwordConfirm: {
-    type: String,
-    required: true,
-    validate: {
-      validator: function (val) {
-        return val === this.password;
-      },
-      message: 'Passwords do not match',
+const userSchema = new mongoose.Schema(
+  {
+    firstName: { type: String, required: true },
+    lastName: { type: String, required: true },
+    email: { type: String, required: true, unique: true },
+    password: {
+      type: String,
+      required: [true, "Password is required"],
+      minlength: 6,
+      maxlength: 8,
     },
+    passwordConfirm: {
+      type: String,
+      required: [true, "Confirm Password is required"],
+      validate: {
+        validator: function (value) {
+          return value === this.password;
+        },
+        message: "Passwords do not match",
+      },
+      passwordChangedAt: { type: Date },
+      passwordResetToken: { type: String },
+      passwordResetExpires: { type: Date },
+      active: {
+        type: Boolean,
+        default: true,
+        select: false,
+      },
+    },
+    state: { type: String, required: true },
+    country: { type: String, required: true },
   },
-  state: String,
-  country: String,
-});
+  { timestamps: true }
+);
 
-// Hash password before saving
-userSchema.pre('save', async function (next) {
-  if (!this.isModified('password')) return next();
+userSchema.pre("save", async function (next) {
+  if (!this.isModified("password")) return next();
+
   this.password = await bcrypt.hash(this.password, 12);
   this.passwordConfirm = undefined;
   next();
 });
-
-// Check password during login
-userSchema.methods.correctPassword = async function (candidatePassword, userPassword) {
+userSchema.methods.correctPassword = async function (
+  candidatePassword,
+  userPassword
+) {
   return await bcrypt.compare(candidatePassword, userPassword);
 };
+userSchema.methods.changedPasswordAfter = function (JWTTimestamp) {
+  if (this.passwordChangedAt) {
+    const changedTimestamp = parseInt(
+      this.passwordChangedAt.getTime() / 1000,
+      10
+    );
+    return JWTTimestamp < changedTimestamp;
+  }
+  return false;
+};
+userSchema.methods.createPasswordResetToken = function () {
+  const resetToken = crypto.randomBytes(32).toString("hex");
+  this.passwordResetToken = crypto
+    .createHash("sha256")
+    .update(resetToken)
+    .digest("hex");
+  this.passwordResetExpires = Date.now() + 10 * 60 * 1000; // 10 minutes
+  return resetToken;
+};
 
-module.exports = mongoose.model('User', userSchema);
+
+const userModel = mongoose.model("User", userSchema);
+
+module.exports = userModel;
