@@ -2,7 +2,7 @@
 const axios = require('axios');
 const dotenv = require('dotenv');
 const validator = require('validator');
-dotenv.config({ path: './.env' });
+dotenv.config({ path: './config.env' });
 
 
 const API_KEY = process.env.API_KEY;
