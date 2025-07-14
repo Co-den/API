@@ -42,7 +42,7 @@ const createSendToken = (user, statusCode, req, res) => {
 
 // Register a new user
 exports.register = async (req, res) => {
-  const newUser = new User({
+  const newUser = await User.create({
     firstName: req.body.firstName,
     lastName: req.body.lastName,
     email: req.body.email,
@@ -53,13 +53,13 @@ exports.register = async (req, res) => {
   });
 
   try {
-    await newUser.save();
     createSendToken(newUser, 201, req, res);
   } catch (err) {
     res
       .status(500)
       .json({ message: "Registration failed", error: err.message });
   }
+  
 };
 
 // Login an existing user
