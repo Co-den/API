@@ -22,19 +22,19 @@ const userSchema = new mongoose.Schema(
         },
         message: "Passwords do not match",
       },
-      passwordChangedAt: { type: Date },
-      passwordResetToken: { type: String },
-      passwordResetExpires: { type: Date },
-      active: {
-        type: Boolean,
-        default: true,
-        select: false,
-      },
+    },
+    passwordChangedAt: { type: Date },
+    passwordResetToken: { type: String },
+    passwordResetExpires: { type: Date },
+    active: {
+      type: Boolean,
+      default: true,
+      select: false,
     },
     state: { type: String, required: true },
     country: { type: String, required: true },
   },
-  { timestamps: true }
+  { timestamps: true },
 );
 
 userSchema.pre("save", async function (next) {
@@ -46,7 +46,7 @@ userSchema.pre("save", async function (next) {
 });
 userSchema.methods.correctPassword = async function (
   candidatePassword,
-  userPassword
+  userPassword,
 ) {
   return await bcrypt.compare(candidatePassword, userPassword);
 };
@@ -54,7 +54,7 @@ userSchema.methods.changedPasswordAfter = function (JWTTimestamp) {
   if (this.passwordChangedAt) {
     const changedTimestamp = parseInt(
       this.passwordChangedAt.getTime() / 1000,
-      10
+      10,
     );
     return JWTTimestamp < changedTimestamp;
   }
@@ -69,7 +69,6 @@ userSchema.methods.createPasswordResetToken = function () {
   this.passwordResetExpires = Date.now() + 10 * 60 * 1000; // 10 minutes
   return resetToken;
 };
-
 
 const userModel = mongoose.model("User", userSchema);
 
