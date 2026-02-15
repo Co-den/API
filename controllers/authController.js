@@ -14,19 +14,20 @@ const createSendToken = (user, statusCode, req, res) => {
 
   const cookieOptions = {
     expires: new Date(
-      Date.now() + process.env.JWT_COOKIES_EXPIRES_IN * 24 * 60 * 60 * 1000
+      Date.now() + process.env.JWT_COOKIES_EXPIRES_IN * 24 * 60 * 60 * 1000,
     ),
     httpOnly: true,
-    secure: process.env.NODE_ENV === 'production'
-      ? req.secure || req.headers['x-forwarded-proto'] === 'https'
-      : false,
+    secure:
+      process.env.NODE_ENV === "production"
+        ? req.secure || req.headers["x-forwarded-proto"] === "https"
+        : false,
   };
 
-  res.cookie('jwt', token, cookieOptions);
+  res.cookie("jwt", token, cookieOptions);
   user.password = undefined;
 
   res.status(statusCode).json({
-    status: 'success',
+    status: "success",
     token,
     user: {
       id: user._id,
@@ -39,14 +40,13 @@ const createSendToken = (user, statusCode, req, res) => {
   });
 };
 
-
 // Register a new user
 exports.register = async (req, res) => {
   const newUser = await User.create({
-    firstName: req.body.firstName,
-    lastName: req.body.lastName,
-    email: req.body.email,
-    password: req.body.password,
+    firstName: req.body.firstName?.trim(),
+    lastName: req.body.lastName?.trim(),
+    email: req.body.email?.trim().toLowerCase(),
+    password: req.body.password?.trim(),
     passwordConfirm: req.body.passwordConfirm,
     state: req.body.state,
     country: req.body.country,
@@ -59,12 +59,12 @@ exports.register = async (req, res) => {
       .status(500)
       .json({ message: "Registration failed", error: err.message });
   }
-  
 };
 
 // Login an existing user
 exports.login = async (req, res) => {
-  const { email, password } = req.body;
+  const email = req.body.email?.trim().toLowerCase();
+  const password = req.body.password?.trim();
 
   if (!email || !password) {
     return res
@@ -106,7 +106,7 @@ exports.forgotPassword = async (req, res) => {
 
   // Send the reset token to the user's email
   const resetURL = `${req.protocol}://${req.get(
-    "host"
+    "host",
   )}/api/v1/auth/resetPassword/${resetToken}`;
   const message = `Forgot your password? Submit a PATCH request with your new password and passwordConfirm to: ${resetURL}`;
 
